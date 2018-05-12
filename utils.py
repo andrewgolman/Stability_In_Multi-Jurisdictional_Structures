@@ -12,4 +12,24 @@ def sort_ratios():
     for i in res:
         print(round(i[3], 4), i[1]/i[0], i[1], i[0], file=out)
 
-sort_ratios()
+# sort_ratios()
+
+def get_pairs():
+    file = open("results/2DIVratio.txt", "r")
+    pairs = []
+    for i in file:
+        items = i.split(" ")
+        pairs.append((int(items[2].strip()), int(items[3].strip())))
+    return pairs
+
+
+def get_data():
+    file = open("results/2coalitionsDATA.txt", "r")
+    data = []
+    for i in file:
+        items = i.split(" ")
+        items = list(map(lambda x: float(x.strip()), items))
+        data.append(items)
+    # L R dist EPS
+    return data
+

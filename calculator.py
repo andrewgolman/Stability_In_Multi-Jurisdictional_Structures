@@ -3,7 +3,7 @@ from numpy import linspace
 
 INF = 100000
 MEDIANS = 10
-LIM = 0.0001
+LIM = 0.005
 
 
 def all_communities(n):
@@ -122,12 +122,11 @@ class Allocation:
 def main():
     # file = open("222.txt", "a")
     # fa = open("analisys.txt", "a")
-    for i in linspace(0.35, 0.35, 1):
-        for j in linspace(0.7, 1, 7):
-                agents = [0, 0, i, i, i+j, i+j]
-                n = Allocation(*agents).calculate_stability()
-                if n > 0.05:
-                    print(agents, n)
+    for i in linspace(0, 1, 5):
+        agents = [0, 0, 0, i, i, i, i]
+        n = Allocation(*agents).calculate_stability()
+        if n > 0.05:
+            print(agents, n)
                         
 
 if __name__ == "__main__":
