@@ -33,3 +33,7 @@ def get_data():
     # L R dist EPS
     return data
 
+def non_negative(f):
+    def func(*args, **kwargs):
+        return max(0, f(*args, **kwargs))
+    return func
