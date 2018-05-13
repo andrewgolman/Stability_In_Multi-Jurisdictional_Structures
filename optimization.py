@@ -1,46 +1,57 @@
-from scipy.optimize import minimize
-import numpy as np
+from utils import non_negative
 
 
 def delta_by_costs(old, new):
     return 1 - new/old
 
+# f_i - i-th system from the article
 
+@non_negative
 def f2(k, d):  # UNION
     return delta_by_costs(1/(1+k) + d, 1)
 
 
-def f3(k, d):  # FEDERATION + UNDEF
+@non_negative
+def f3(k, d):  # FEDERATION + m(S)=undef
     eta = ((k-1) / 2 + k * d) / (1+k)
     # print(eta)
     d1 = delta_by_costs(1, 1/2 + eta)
     d2 = delta_by_costs(1 / k, 1/2 + d - eta)
-    return min(d1, d2, 0)
+    return min(d1, d2)
 
 
-def f4(k, d):  # FEDERATION + RIGHT
+@non_negative
+def f4(k, d):  # FEDERATION + m(S)=right
     # print(k, d)
     d1 = delta_by_costs(1, 1 / (1+k) + d)
     d2 = delta_by_costs(1 / k, 1 / (1+k))
-    return min(d1, d2, 0)
+    return min(d1, d2)
 
 
-def f5(k, d):  # MAXUNDEF
+@non_negative
+def f5(k, d):  # MAXUNDEF + S=left agents
+    m = d / 2
+    return delta_by_costs(1 / 2 + m, 1 / k)
+
+
+@non_negative
+def f6(k, d):  # MAXUNDEF + S=all agents
     m = d/2
     d1 = delta_by_costs(1 / 2 + m, 1 / (1+k) + d)
     d2 = delta_by_costs(1 / 2 + d - m, 1 / (1+k))
-    return min(d1, d2, 0)
+    d3 = delta_by_costs(1/2 + d - m, 1/k)
+    d4 = delta_by_costs(1/2 + m, 1/k)
+    return max(min(d1, d2), d3, d4)
+
+
+@non_negative
+def f7(k, d):  # MAXUNDEF + S=right agents
+    m = d / 2
+    d1 = delta_by_costs(1 / 2 + d - m, 1 / k)
+    d2 = 1 / k
+    return min(d1, d2)
 
 
 def f(ar):
     k, d = tuple(ar)
-    return min(f2(k, d), max(f3(k, d), f4(k, d)), f5(k, d))
-
-# constraint = LinearConstraint(np.ones((2,)), lb=np.array([[1], [0]]), ub=np.array([[2], [1]]))
-
-
-def constraint(ar):
-    a = tuple(ar)
-    return not (1 < a[0] < 2 and 0 < a[1] < 1)
-
-# print(minimize(f, x0=(1.5, 0.5), method='L-BFGS-B', bounds=((1, 2), (0, 1))))
+    return min(f2(k, d), max(f3(k, d), f4(k, d)), max(f5(k, d), f6(k, d), f7(k, d)))

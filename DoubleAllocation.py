@@ -152,7 +152,7 @@ class DoubleAllocation:
         # group(self, allocation, left, right, med=None):
         ans = 1
         for a in range(self.left):
-            print(a, ans)
+            # print(a, ans)
             for m in linspace(0, self.dist, probes):
                 for l in range(self.left - a):
                     groups = list()
