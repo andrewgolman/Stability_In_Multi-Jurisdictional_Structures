@@ -71,28 +71,28 @@ class DoubleAllocation:
         left_costs = list(reversed(sorted(partition.left_costs())))
         right_costs = list(reversed(sorted(partition.right_costs())))
         ans = 0
-        for i in range(self.left):
-            delta_costs_left = self.delta(left_costs[i], self.costs(i+1, 0))
+        for i in range(1, self.left + 1):  # pure left groups
+            delta_costs_left = self.delta(left_costs[i-1], self.costs(i, 0))
             ans = max(ans, delta_costs_left)
-        for i in range(self.right):
-            delta_costs_right = self.delta(right_costs[i], self.costs(i+1, 0))
+        for i in range(1, self.right +1):  # pure right groups
+            delta_costs_right = self.delta(right_costs[i-1], self.costs(i, 0))
             ans = max(ans, delta_costs_right)
-        for i in range(self.left):
-            med = self.to_the_segment((left_costs[i] - right_costs[i] + self.dist) / 2)
-            delta_costs_left = self.delta(left_costs[i], self.costs(2*(i+1), med))
-            delta_costs_right = self.delta(right_costs[i], self.costs(2*(i+1), self.dist - med))
+        for i in range(1, self.left + 1):  # undefined groups
+            med = self.to_the_segment((left_costs[i-1] - right_costs[i-1] + self.dist) / 2)
+            delta_costs_left = self.delta(left_costs[i-1], self.costs(2*i, med))
+            delta_costs_right = self.delta(right_costs[i-1], self.costs(2*i, self.dist - med))
             ans = max(ans, min(delta_costs_left, delta_costs_right))
 
-        for i in range(1, self.left):
-            for j in range(i):
-                delta_costs_left = self.delta(left_costs[i], self.costs(i+j+2, 0))
-                delta_costs_right = self.delta(right_costs[i], self.costs(i+j+2, self.dist))
+        for i in range(1, self.left + 1):  # left part
+            for j in range(1, i):  # right part
+                delta_costs_left = self.delta(left_costs[i-1], self.costs(i+j, 0))
+                delta_costs_right = self.delta(right_costs[j-1], self.costs(i+j, self.dist))
                 ans = max(ans, min(delta_costs_left, delta_costs_right))
 
-        for j in range(1, self.right):
-            for i in range(min(j, self.left)):
-                delta_costs_left = self.delta(left_costs[i], self.costs(i + j + 2, self.dist))
-                delta_costs_right = self.delta(right_costs[i], self.costs(i + j + 2, 0))
+        for j in range(1, self.right + 1):  # right part
+            for i in range(1, min(j, self.left)):  # left part
+                delta_costs_left = self.delta(left_costs[i-1], self.costs(i+j, self.dist))
+                delta_costs_right = self.delta(right_costs[j-1], self.costs(i+j, 0))
                 ans = max(ans, min(delta_costs_left, delta_costs_right))
 
         return ans
@@ -133,6 +133,7 @@ class DoubleAllocation:
         b = self.stability_for_partition(self.unity())
         c = self.stability_for_partition(self.undefmax())
         stability = min(a, b, c)
+        # print(a, b, c)
         data = (int(1000*a), int(1000*b), int(1000*c))
         return Stability(stability, data)
 
@@ -147,33 +148,36 @@ class DoubleAllocation:
                 ans = (cur, p)
         return Stability(ans[0], ans[1])
 
-    def true_stability(self, probes):
+    def true_stability(self, probes, verbose=False):
         # partition(self, allocation, groups):
         # group(self, allocation, left, right, med=None):
         ans = 1
         for a in range(self.left):
-            # print(a, ans)
+            if verbose:
+                print(a, ans)
             for m in linspace(0, self.dist, probes):
                 for l in range(self.left - a):
                     groups = list()
                     if a:
                         groups.append(Group(self, a, a, m))
-                    groups.append(Group(self, l, self.right))
-                    groups.append(Group(self, self.left - l, 0))
+                    groups.append(Group(self, l, self.right - a))
+                    groups.append(Group(self, self.left - l - a, 0))
                     partition = Partition(self, groups)
                     next_val = self.stability_for_partition(partition)
                     if next_val < ans:
                         ans = next_val
-                        # print("l", a, m, l, ans)
+                        if verbose:
+                            print("l", a, m, l, ans)
                 for r in range(self.right - a):
                     groups = list()
                     if a:
                         groups.append(Group(self, a, a, m))
-                    groups.append(Group(self, self.left, r))
-                    groups.append(Group(self, 0, self.right - r))
+                    groups.append(Group(self, self.left - a, r))
+                    groups.append(Group(self, 0, self.right - r - a))
                     partition = Partition(self, groups)
                     next_val = self.stability_for_partition(partition)
                     if next_val < ans:
                         ans = next_val
-                        # print("r", a, m, r, ans)
+                        if verbose:
+                            print("r", a, m, r, ans)
         return ans
