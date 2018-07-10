@@ -1,6 +1,7 @@
 from DoubleAllocation import *
 from numpy import linspace
 from optimization import f
+# from optimization2 import f
 
 
 def case_1():
@@ -22,17 +23,39 @@ def case_2():
     r = 38
     d = 0.022
     p = DoubleAllocation(l, r, d)
+    print(p.trivial_stability())
     print(p.true_stability(200))
 
 
 def case_3():
+    # file = open("optim.txt", "a")
     data = 0, 0, 0
-    for k in linspace(1, 1.62, 10000):
-        for d in linspace(k / (1 + k), 1 / k, 10000):
-            next = f((k, d))
+    for k in linspace(1, 1.62, 1001):
+        print(k)
+        for d in linspace(k / (1 + k), 1 / k, 1001):
+            step = 12
+            next = f((k, d, step))
+            # if next > 0:
+            #     print(next, k, d, step, file=file)
             if next > data[0]:
                 data = next, k, d
     print(data)
+
+
+def case_4():
+    for d in linspace(0.18, 0.23, 101):
+        p = DoubleAllocation(3, 4, d, enable_absolute_costs=True)
+        val = p.true_stability(1000)
+        if val > 0.001:
+            print(d, val)
+
+
+def case_5():
+    for d in linspace(0.1, 0.2, 101):
+        p = DoubleAllocation(4, 5, d, enable_absolute_costs=True)
+        val = p.true_stability(100)
+        if val > 0.001:
+            print(d, val)
 
 
 # be careful, this may take up to...
