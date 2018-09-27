@@ -1,5 +1,6 @@
 from typing import List
 from numpy import linspace
+from time import time
 
 
 class Stability():
@@ -37,6 +38,9 @@ class Group:
         else:
             self.median_ = med
 
+    def __str__(self):
+        return self.left_, self.right_, self.median_
+
     def data(self):
         return self.left_, self.right_, self.median_
 
@@ -55,8 +59,8 @@ class DoubleAllocation:
     def to_the_segment(self, point: float) -> float:
         if point > self.dist:
             return self.dist
-        if point < 0:
-            return 0
+        if point < 0.:
+            return 0.
         return point
 
     def costs(self, size, distance):
@@ -74,11 +78,19 @@ class DoubleAllocation:
         for i in range(1, self.left + 1):  # pure left groups
             delta_costs_left = self.delta(left_costs[i-1], self.costs(i, 0))
             ans = max(ans, delta_costs_left)
-        for i in range(1, self.right +1):  # pure right groups
+        for i in range(1, self.right + 1):  # pure right groups
             delta_costs_right = self.delta(right_costs[i-1], self.costs(i, 0))
             ans = max(ans, delta_costs_right)
         for i in range(1, self.left + 1):  # undefined groups
-            med = self.to_the_segment((left_costs[i-1] - right_costs[i-1] + self.dist) / 2)
+
+            if not self.absolute_costs:
+                transport_costs = 1. / 2 / i
+                lc = left_costs[i-1]
+                rc = right_costs[i-1]
+                med = self.to_the_segment(((transport_costs + self.dist) * lc - transport_costs * rc) / (lc + rc))
+            else:
+                med = self.to_the_segment((left_costs[i - 1] - right_costs[i - 1] + self.dist) / 2)
+
             delta_costs_left = self.delta(left_costs[i-1], self.costs(2*i, med))
             delta_costs_right = self.delta(right_costs[i-1], self.costs(2*i, self.dist - med))
             ans = max(ans, min(delta_costs_left, delta_costs_right))
@@ -90,7 +102,7 @@ class DoubleAllocation:
                 ans = max(ans, min(delta_costs_left, delta_costs_right))
 
         for j in range(1, self.right + 1):  # right part
-            for i in range(1, min(j, self.left)):  # left part
+            for i in range(1, min(j, self.left + 1)):  # left part
                 delta_costs_left = self.delta(left_costs[i-1], self.costs(i+j, self.dist))
                 delta_costs_right = self.delta(right_costs[j-1], self.costs(i+j, 0))
                 ans = max(ans, min(delta_costs_left, delta_costs_right))
@@ -152,17 +164,21 @@ class DoubleAllocation:
         # partition(self, allocation, groups):
         # group(self, allocation, left, right, med=None):
         ans = 1
-        for a in range(self.left):
+        t = time()
+        # for a in range(self.left):
+        for a in [0, self.left]:
             if verbose:
-                print(a, ans)
+                print("Starting groups with {} med group. Current eps={}.".format(a, ans))
             for m in linspace(0, self.dist, probes):
                 for l in range(self.left - a):
                     groups = list()
                     if a:
                         groups.append(Group(self, a, a, m))
                     groups.append(Group(self, l, self.right - a))
-                    groups.append(Group(self, self.left - l - a, 0))
+                    if l+a != self.left:
+                        groups.append(Group(self, self.left - l - a, 0))
                     partition = Partition(self, groups)
+                    # print(groups)
                     next_val = self.stability_for_partition(partition)
                     if next_val < ans:
                         ans = next_val
@@ -172,12 +188,29 @@ class DoubleAllocation:
                     groups = list()
                     if a:
                         groups.append(Group(self, a, a, m))
-                    groups.append(Group(self, self.left - a, r))
-                    groups.append(Group(self, 0, self.right - r - a))
+                    if a != self.left or r:
+                        groups.append(Group(self, self.left - a, r))
+                    if a+r != self.right:
+                        groups.append(Group(self, 0, self.right - r - a))
                     partition = Partition(self, groups)
+                    # print(groups)
                     next_val = self.stability_for_partition(partition)
                     if next_val < ans:
                         ans = next_val
                         if verbose:
                             print("r", a, m, r, ans)
+                if a == 0:
+                    break
+            if verbose:
+                print("{} seconds elapsed".format(time() - t))
         return ans
+
+
+if __name__ == "__main__":
+    l = 56
+    r = 73
+    d = 0.6363245 / 56
+    p = DoubleAllocation(l, r, d)
+    print(p.stability_for_partition(p.federation()))
+    print(p.stability_for_partition(p.unity()))
+    print(p.stability_for_partition(p.undefmax()))

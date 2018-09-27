@@ -118,8 +118,8 @@ def test_new_induction():
 
 
 def test_true_stability():
-    l = 29
-    r = 38
+    l = 28
+    r = 39
     d = 0.022
     p = DoubleAllocation(l, r, d)
     print(p.true_stability(200))
