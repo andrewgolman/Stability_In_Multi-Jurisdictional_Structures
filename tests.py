@@ -3,6 +3,7 @@ from numpy import linspace
 from utils import *
 LIM = 0.01
 
+
 def test_non_trivial():
     pairs = get_pairs()
     for i, j in pairs[:10]:
@@ -13,7 +14,6 @@ def test_non_trivial():
             if st.value < res[0].value:
                 res = (st, d)
         if res[0].value > LIM:
-            # print(i, j, res[1], res[0].value, res[0].data, file=file)
             print(i, j, res[1], res[0].value, res[0].data)
 
 
@@ -27,7 +27,6 @@ def analyze():
             if st.value > res[0].value:
                 res = (st, d)
         if res[0].value > LIM:
-            # print(i, j, res[1], res[0].value, res[0].data, file=file)
             print(i, j, res[1], res[0].value, res[0].data)
 
 
@@ -71,7 +70,6 @@ def test_trivial_agents(n, m, create_file=False):
 
 def simple_test():
     print(DoubleAllocation(2, 3, 14 / 45).trivial_stability().value)
-    # assert(abs(DoubleAllocation(2, 3, 14 / 45).is_trivially_stable() - 1/90) < 0.0001)
 
 
 def test_useless_lowerbound_theorem():
@@ -84,7 +82,6 @@ def test_useless_lowerbound_theorem():
             n += 1
     if not n:
         print("useless")
-
 
 
 def lowerbound_costs_city(n, eps):
@@ -112,9 +109,6 @@ def test_new_induction():
             print(l, r, d, eps)
             print(1 / 2 - eps, l * d)
             print(int(l / ((1 / 4 - eps / 2) / d)))
-        # else:
-        #     print(l, r, d, eps)
-        #     print((1 / 4 - eps / 2) / d, l / 2)
 
 
 def test_true_stability():
@@ -125,16 +119,10 @@ def test_true_stability():
     print(p.true_stability(200))
 
 
-def main():
+if __name__ == "__main__":
     # test_trivial_all_to_n(100, start=51, start_all=35)
     # test_new_induction()
     # test_trivial_one_case(1000, 1307, 0.64399554113739/1000)
     # test_true_stability()
     test_trivial_all_to_n(100)
     # simple_test()
-
-main()
-
-# (0.06865687401542786, 1.306868686868687, 0.64399554113739832)
-
-# 0.05507279693486589

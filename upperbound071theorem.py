@@ -4,7 +4,9 @@ from utils import non_negative
 def delta_by_costs(old, new):
     return 1 - new/old
 
-# f_i - i-th system from the article
+
+""" fi corresponds to the i-th system from the article """
+
 
 @non_negative
 def f2(k, d):  # UNION
@@ -22,7 +24,6 @@ def f3(k, d):  # FEDERATION + m(S)=undef
 
 @non_negative
 def f4(k, d):  # FEDERATION + m(S)=right
-    # print(k, d)
     d1 = delta_by_costs(1, 1 / (1+k) + d)
     d2 = delta_by_costs(1 / k, 1 / (1+k))
     return min(d1, d2)
@@ -52,6 +53,6 @@ def f7(k, d):  # MAXUNDEF + S=right agents
     return min(d1, d2)
 
 
-def f(ar):
+def upperbound071_function(ar):
     k, d = tuple(ar)
     return min(f2(k, d), max(f3(k, d), f4(k, d)), max(f5(k, d), f6(k, d), f7(k, d)))
