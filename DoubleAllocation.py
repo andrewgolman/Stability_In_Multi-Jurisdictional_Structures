@@ -3,7 +3,7 @@ from numpy import linspace
 from time import time
 
 
-class Stability():
+class Stability:
     def __init__(self, value, data):
         self.value = round(value, 5)
         self.data = data
@@ -145,7 +145,6 @@ class DoubleAllocation:
         b = self.stability_for_partition(self.unity())
         c = self.stability_for_partition(self.undefmax())
         stability = min(a, b, c)
-        # print(a, b, c)
         data = (int(1000*a), int(1000*b), int(1000*c))
         return Stability(stability, data)
 
@@ -160,13 +159,15 @@ class DoubleAllocation:
                 ans = (cur, p)
         return Stability(ans[0], ans[1])
 
-    def true_stability(self, probes, verbose=False):
-        # partition(self, allocation, groups):
-        # group(self, allocation, left, right, med=None):
+    def true_stability(self, probes, verbose=False, only_boundary_cases=False):
+        """
+        # constructor usage: partition(self, allocation, groups):
+        # constructor usage: group(self, allocation, left, right, med=None)
+        """
         ans = 1
         t = time()
-        # for a in range(self.left):
-        for a in [0, self.left]:
+        a_range = range(self.left) if not only_boundary_cases else [0, self.left]
+        for a in a_range:
             if verbose:
                 print("Starting groups with {} med group. Current eps={}.".format(a, ans))
             for m in linspace(0, self.dist, probes):
@@ -178,7 +179,6 @@ class DoubleAllocation:
                     if l+a != self.left:
                         groups.append(Group(self, self.left - l - a, 0))
                     partition = Partition(self, groups)
-                    # print(groups)
                     next_val = self.stability_for_partition(partition)
                     if next_val < ans:
                         ans = next_val
@@ -193,7 +193,6 @@ class DoubleAllocation:
                     if a+r != self.right:
                         groups.append(Group(self, 0, self.right - r - a))
                     partition = Partition(self, groups)
-                    # print(groups)
                     next_val = self.stability_for_partition(partition)
                     if next_val < ans:
                         ans = next_val
