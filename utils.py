@@ -1,6 +1,14 @@
-def sort_ratios():
-    file = open("2coalitionsDIV.txt", "r")
-    out = open("2DIVratio.txt", "w")
+def absolute_cost_reduction(old_costs, new_costs):
+    return old_costs - new_costs
+
+
+def relative_cost_reduction(old_costs, new_costs):
+    return 1 - new_costs / old_costs
+
+
+def sort_ratios(in_file="2coalitionsDIV.txt", out_file="2DIVratio.txt"):
+    file = open(in_file, "r")
+    out = open(out_file, "w")
     res = []
     for s in file.readlines():
         res.append(s.split(" "))
@@ -12,10 +20,9 @@ def sort_ratios():
     for i in res:
         print(round(i[3], 4), i[1]/i[0], i[1], i[0], file=out)
 
-# sort_ratios()
 
-def get_pairs():
-    file = open("results/2DIVratio.txt", "r")
+def get_pairs(in_file="results/2DIVratio.txt"):
+    file = open(in_file, "r")
     pairs = []
     for i in file:
         items = i.split(" ")
@@ -23,15 +30,16 @@ def get_pairs():
     return pairs
 
 
-def get_data():
-    file = open("results/2coalitionsDATA.txt", "r")
+def get_data(in_file="results/2coalitionsDATA.txt"):
+    """return format: (L R dist EPS)"""
+    file = open(in_file, "r")
     data = []
     for i in file:
         items = i.split(" ")
         items = list(map(lambda x: float(x.strip()), items))
         data.append(items)
-    # L R dist EPS
     return data
+
 
 def non_negative(f):
     def func(*args, **kwargs):
