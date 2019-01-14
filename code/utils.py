@@ -1,3 +1,7 @@
+def costs(size, pos, med=0):
+    return 1. / size + abs(pos - med)
+
+
 def absolute_cost_reduction(old_costs, new_costs):
     return old_costs - new_costs
 
